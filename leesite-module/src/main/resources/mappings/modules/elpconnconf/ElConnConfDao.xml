@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.funtl.leesite.modules.elpconnconf.dao.ElConnConfDao">
+    
+	<sql id="elConnConfColumns">
+		a.conn_server_type AS "connServerType",
+		a.conn_server_category AS "connServerCategory",
+		a.conn_id_valid AS "connIdValid",
+		a.conn_url AS "connUrl",
+		a.conn_driver AS "connDriver",
+		a.default_val_json AS "defaultValJson"
+	</sql>
+	
+	<sql id="elConnConfJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="ElConnConf" >
+		SELECT 
+			<include refid="elConnConfColumns"/>
+		FROM el_conn_conf a
+		<include refid="elConnConfJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ElConnConf" >
+		SELECT 
+			<include refid="elConnConfColumns"/>
+		FROM el_conn_conf a
+		<include refid="elConnConfJoins"/>
+		<where>
+			
+			<if test="connServerType != null and connServerType != ''">
+				AND a.conn_server_type LIKE 
+					<if test="dbName == 'oracle'">'%'||#{connServerType}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{connServerType}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{connServerType},'%')</if>
+			</if>
+			<if test="connIdValid != null and connIdValid != ''">
+				AND a.conn_id_valid = #{connIdValid}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ElConnConf" >
+		SELECT 
+			<include refid="elConnConfColumns"/>
+		FROM el_conn_conf a
+		<include refid="elConnConfJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO el_conn_conf(
+			conn_server_type,
+			conn_server_category,
+			conn_id_valid,
+			conn_url,
+			conn_driver,
+			default_val_json
+		) VALUES (
+			#{connServerType},
+			#{connServerCategory},
+			#{connIdValid},
+			#{connUrl},
+			#{connDriver},
+			#{defaultValJson}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE el_conn_conf SET 	
+			conn_server_category = #{connServerCategory},
+			conn_id_valid = #{connIdValid},
+			conn_url = #{connUrl},
+			conn_driver = #{connDriver},
+			default_val_json = #{defaultValJson}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM el_conn_conf
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE el_conn_conf SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ElConnConf" statementType="STATEMENT">
+		select * FROM el_conn_conf  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>
